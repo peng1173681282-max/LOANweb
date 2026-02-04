@@ -1,0 +1,8 @@
+{
+  "name": "Credit Product Factory",
+  "description": "A professional mid-to-back-office credit product configuration platform featuring smart parameter generation, loan type management, and comprehensive system administration.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
