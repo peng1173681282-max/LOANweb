@@ -39,12 +39,10 @@ const MODULES = [
   { id: 'transaction', label: '交易规则', icon: 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4' },
   { id: 'fee', label: '息费规则', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m.599-1H11' },
   { id: 'repayment', label: '还款规则', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
-  { id: 'return', label: '退货规则', icon: 'M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6' },
   { id: 'post-loan', label: '贷后管理', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
   { id: 'closure', label: '关户规则', icon: 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636' },
 ];
 
-// 固定的 4 个业务场景
 const FIXED_SCENARIOS = [
   { id: 'cash_installment', label: '现金分期', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m.599-1H11' },
   { id: 'consume_installment', label: '消费分期', icon: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z' },
@@ -52,7 +50,6 @@ const FIXED_SCENARIOS = [
   { id: 'withdraw_repay_consume', label: '随借随还消费', icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z' },
 ];
 
-// 已在贷款类型配置中维护好的类型数据源（增加了分类，用于限定范围）
 const MAINTAINED_LOAN_TYPES = [
   { code: 'LP001', name: '标准现金分期', category: 'cash_installment' },
   { code: 'LP002', name: '大额优选现金分期', category: 'cash_installment' },
@@ -69,7 +66,6 @@ const ProductConfig: React.FC = () => {
   const [activeModuleId, setActiveModuleId] = useState('basic');
   const [currentProduct, setCurrentProduct] = useState<any | null>(null);
   
-  // 搜索和下拉状态管理
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -111,23 +107,20 @@ const ProductConfig: React.FC = () => {
       singleCashMaxAmount: '',
       dailyTransMaxCount: '',
       singleTransMaxAmount: '',
-      // 新增息费规则字段
       hasPenalty: 'yes',
       hasCompoundInterest: 'no',
       penaltyBase: 'overduePrincipal',
       penaltyAccountingLocation: 'overduePeriod',
-      // 初始化 提前结清规则 9项清单字段
-      allowPrepayment: 'yes', // 1、是否允许提前结清
-      earliestPrepaymentPeriod: '1', // 2、最早支持提前结清的期次
-      prepaymentFeeRule: 'none', // 3、提前结清手续费收取规则
-      prepaymentFeeBase: 'remainingPrincipal', // 4、提前结清手续费基数
-      prepaymentFeeRate: '', // 5、提前结清手续费比例
-      prepaymentFeeAmountMin: '', // 6、提前结清手续费金额区间-最小
-      prepaymentFeeAmountMax: '', // 6、提前结清手续费金额区间-最大
-      prepaymentInterestRule: 'none', // 7、提前结清利息收取规则
-      prepaymentInterestBase: 'remainingPrincipal', // 8、提前结清利息基数
-      prepaymentInterestRate: '', // 9、提前结清利息比例
-      // 初始化还款规则新增字段
+      penaltyRateMultiplier: '1.5',
+      allowPrepayment: 'yes',
+      earliestPrepaymentPeriod: '1',
+      prepaymentFeeRule: 'none',
+      prepaymentFeeBase: 'remainingPrincipal',
+      prepaymentFeeRate: '',
+      prepaymentFeeAmountMin: '',
+      prepaymentFeeAmountMax: '',
+      prepaymentInterestRule: 'none',
+      prepaymentInterestBase: 'remainingPrincipal',
       supportOfflineRepay: 'no',
       supportQuickRepay: 'no',
       supportSingleDeduction: 'no',
@@ -135,7 +128,14 @@ const ProductConfig: React.FC = () => {
       supportAgentWaiver: 'no',
       overpaymentBatchRefund: 'no',
       overpaymentOffsetArrears: 'no',
-      overpaymentOffsetOtherLoans: 'no'
+      overpaymentOffsetOtherLoans: 'no',
+      supportDebtRestructuring: 'no',
+      supportExtension: 'no',
+      supportRefinancing: 'no',
+      // 初始化关户规则字段
+      closeOnLoanFailure: 'no',       // 1、放款失败是否关户
+      closeOnContractSettlement: 'no', // 2、合同结清是否关户
+      closeOnExpiryNoBalance: 'no'     // 3、有效期到期无余额是否关户
     });
     setActiveModuleId('basic');
     setIsEditing(true);
@@ -199,7 +199,6 @@ const ProductConfig: React.FC = () => {
     setSearchQuery('');
   };
 
-  // 根据分类过滤后的贷款类型
   const getFilteredTypes = (categoryId: string) => {
     return MAINTAINED_LOAN_TYPES.filter(type => 
       type.category === categoryId && 
@@ -634,111 +633,6 @@ const ProductConfig: React.FC = () => {
           <div className="space-y-6">
             <h3 className="text-lg font-bold text-slate-800 border-b border-slate-100 pb-4">息费规则配置</h3>
             <div className="space-y-8">
-              {/* 贷款类型配置 */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <label className="block text-sm font-bold text-slate-700">贷款类型配置 <span className="text-red-500">*</span></label>
-                  <span className="text-[10px] text-slate-400">基于“场景限定 + 搜索关联”机制</span>
-                </div>
-                
-                <div className="grid grid-cols-1 gap-4">
-                  {FIXED_SCENARIOS.map((scenario) => {
-                    const selectedCode = currentProduct?.scenarioMapping?.[scenario.id];
-                    const selectedType = MAINTAINED_LOAN_TYPES.find(t => t.code === selectedCode);
-                    const isOpen = openDropdownId === scenario.id;
-                    const filteredTypes = getFilteredTypes(scenario.id);
-
-                    return (
-                      <div key={scenario.id} className="relative">
-                        <div 
-                          onClick={() => {
-                            if (openDropdownId === scenario.id) {
-                              setOpenDropdownId(null);
-                            } else {
-                              setOpenDropdownId(scenario.id);
-                              setSearchQuery('');
-                            }
-                          }}
-                          className={`flex items-center p-4 rounded-2xl border transition-all cursor-pointer ${
-                            isOpen ? 'bg-white border-blue-500 shadow-lg ring-2 ring-blue-50' : 'bg-slate-50 border-slate-200 hover:border-blue-200 hover:bg-white'
-                          }`}
-                        >
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-4 transition-colors ${
-                            selectedCode ? 'bg-blue-600 text-white' : 'bg-white border border-slate-100 text-slate-400'
-                          }`}>
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={scenario.icon} />
-                            </svg>
-                          </div>
-                          <div className="flex-1 min-w-0 mr-6">
-                            <p className="text-sm font-bold text-slate-800">{scenario.label}</p>
-                            <p className="text-[10px] text-slate-400">限定分类范围: {scenario.label}</p>
-                          </div>
-                          
-                          <div className="flex items-center space-x-2">
-                            {selectedCode ? (
-                              <div className="flex items-center space-x-2 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
-                                <span className="text-xs font-mono font-bold text-blue-700">[{selectedCode}]</span>
-                                <span className="text-xs font-medium text-slate-700">{selectedType?.name}</span>
-                              </div>
-                            ) : (
-                              <span className="text-xs text-slate-400">未关联编码</span>
-                            )}
-                            <svg className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                          </div>
-                        </div>
-
-                        {isOpen && (
-                          <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl z-20 overflow-hidden animate-in fade-in slide-in-from-top-2">
-                            <div className="p-3 border-b border-slate-50 bg-slate-50/50 flex items-center space-x-3">
-                              <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                              </svg>
-                              <input 
-                                autoFocus
-                                type="text" 
-                                placeholder="搜索编码或名称..."
-                                className="flex-1 bg-transparent border-none outline-none text-xs font-medium text-slate-700"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                onClick={(e) => e.stopPropagation()}
-                              />
-                            </div>
-                            <div className="max-h-48 overflow-y-auto py-2">
-                              {filteredTypes.length > 0 ? (
-                                filteredTypes.map((type) => (
-                                  <div 
-                                    key={type.code}
-                                    onClick={(e) => { e.stopPropagation(); updateScenarioCode(scenario.id, type.code); }}
-                                    className={`px-4 py-2.5 flex items-center justify-between hover:bg-blue-50 cursor-pointer transition-colors ${selectedCode === type.code ? 'bg-blue-50' : ''}`}
-                                  >
-                                    <div className="flex flex-col">
-                                      <span className={`text-xs font-bold ${selectedCode === type.code ? 'text-blue-700' : 'text-slate-700'}`}>{type.name}</span>
-                                      <span className="text-[10px] text-slate-400 font-mono">Code: {type.code}</span>
-                                    </div>
-                                    {selectedCode === type.code && (
-                                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                                      </svg>
-                                    )}
-                                  </div>
-                                ))
-                              ) : (
-                                <div className="px-4 py-6 text-center">
-                                  <p className="text-xs text-slate-400">未找到匹配的维护编码</p>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
               {/* 罚息配置 */}
               <div className="space-y-4 pt-4 border-t border-slate-50">
                 <h4 className="text-sm font-bold text-slate-800 flex items-center">
@@ -768,170 +662,70 @@ const ProductConfig: React.FC = () => {
                       <option value="remainingPrincipal">剩余未还本金</option>
                     </select>
                   </div>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-bold text-slate-700">罚息上浮倍数 <span className="text-red-500">*</span></label>
+                    <input 
+                      type="number" step="0.1" placeholder="如：1.5"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                      value={currentProduct?.penaltyRateMultiplier || ''}
+                      onChange={(e) => setCurrentProduct({...currentProduct, penaltyRateMultiplier: e.target.value})}
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* 提前结清规则模块 - 精准替换部分 */}
+              {/* 提前结清规则区域 */}
               <div className="space-y-4 pt-4 border-t border-slate-50">
                 <h4 className="text-sm font-bold text-indigo-700 flex items-center bg-indigo-50 px-3 py-2 rounded-lg">
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
                   提前结清规则
                 </h4>
                 <div className="grid grid-cols-2 gap-6 px-1">
-                  {/* 1. 是否允许提前结清 */}
                   <div className="space-y-2">
                     <label className="block text-sm font-bold text-slate-700">1、是否允许提前结清 <span className="text-red-500">*</span></label>
-                    <div className="relative">
-                      <select 
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer"
-                        value={currentProduct?.allowPrepayment || 'yes'}
-                        onChange={(e) => setCurrentProduct({...currentProduct, allowPrepayment: e.target.value})}
-                      >
-                        <option value="yes">是</option>
-                        <option value="no">否</option>
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                      </div>
-                    </div>
+                    <select 
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm appearance-none cursor-pointer"
+                      value={currentProduct?.allowPrepayment || 'yes'}
+                      onChange={(e) => setCurrentProduct({...currentProduct, allowPrepayment: e.target.value})}
+                    >
+                      <option value="yes">是</option>
+                      <option value="no">否</option>
+                    </select>
                   </div>
-
-                  {/* 2. 最早支持提前结清的期次 */}
                   <div className="space-y-2">
                     <label className="block text-sm font-bold text-slate-700">2、最早支持提前结清的期次 <span className="text-red-500">*</span></label>
                     <input 
-                      type="number" min="1" placeholder="请输入期次，如：1"
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm disabled:opacity-50"
-                      disabled={currentProduct?.allowPrepayment === 'no'}
+                      type="number" min="1" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm"
                       value={currentProduct?.earliestPrepaymentPeriod || ''}
                       onChange={(e) => setCurrentProduct({...currentProduct, earliestPrepaymentPeriod: e.target.value})}
                     />
                   </div>
-
-                  {/* 3. 提前结清手续费收取规则 */}
                   <div className="space-y-2">
                     <label className="block text-sm font-bold text-slate-700">3、提前结清手续费收取规则 <span className="text-red-500">*</span></label>
-                    <div className="relative">
-                      <select 
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer disabled:opacity-50"
-                        disabled={currentProduct?.allowPrepayment === 'no'}
-                        value={currentProduct?.prepaymentFeeRule || 'none'}
-                        onChange={(e) => setCurrentProduct({...currentProduct, prepaymentFeeRule: e.target.value})}
-                      >
-                        <option value="none">不收取</option>
-                        <option value="proportional">按比例收取</option>
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                      </div>
-                    </div>
+                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm appearance-none cursor-pointer" value={currentProduct?.prepaymentFeeRule || 'none'} onChange={(e) => setCurrentProduct({...currentProduct, prepaymentFeeRule: e.target.value})}><option value="none">不收取</option><option value="proportional">按比例收取</option></select>
                   </div>
-
-                  {/* 4. 提前结清手续费基数 */}
                   <div className="space-y-2">
                     <label className="block text-sm font-bold text-slate-700">4、提前结清手续费基数</label>
-                    <div className="relative">
-                      <select 
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer disabled:opacity-50"
-                        disabled={currentProduct?.prepaymentFeeRule === 'none' || currentProduct?.allowPrepayment === 'no'}
-                        value={currentProduct?.prepaymentFeeBase || 'remainingPrincipal'}
-                        onChange={(e) => setCurrentProduct({...currentProduct, prepaymentFeeBase: e.target.value})}
-                      >
-                        <option value="remainingPrincipal">剩余未还本金</option>
-                        <option value="unbilledPrincipal">未出账本金</option>
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                      </div>
-                    </div>
+                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm appearance-none cursor-pointer" value={currentProduct?.prepaymentFeeBase || 'remainingPrincipal'} onChange={(e) => setCurrentProduct({...currentProduct, prepaymentFeeBase: e.target.value})}><option value="remainingPrincipal">剩余未还本金</option><option value="unbilledPrincipal">未出账本金</option></select>
                   </div>
-
-                  {/* 5. 提前结清手续费比例 */}
                   <div className="space-y-2">
                     <label className="block text-sm font-bold text-slate-700">5、提前结清手续费比例 (%)</label>
-                    <input 
-                      type="number" step="0.01" placeholder="如：2.00"
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm disabled:opacity-50"
-                      disabled={currentProduct?.prepaymentFeeRule === 'none' || currentProduct?.allowPrepayment === 'no'}
-                      value={currentProduct?.prepaymentFeeRate || ''}
-                      onChange={(e) => setCurrentProduct({...currentProduct, prepaymentFeeRate: e.target.value})}
-                    />
+                    <input type="number" step="0.01" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" value={currentProduct?.prepaymentFeeRate || ''} onChange={(e) => setCurrentProduct({...currentProduct, prepaymentFeeRate: e.target.value})} />
                   </div>
-
-                  {/* 6. 提前结清手续费金额区间 */}
                   <div className="space-y-2">
                     <label className="block text-sm font-bold text-slate-700">6、提前结清手续费金额区间</label>
                     <div className="flex items-center space-x-2">
-                      <input 
-                        type="number" placeholder="最小"
-                        className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm disabled:opacity-50"
-                        disabled={currentProduct?.prepaymentFeeRule === 'none' || currentProduct?.allowPrepayment === 'no'}
-                        value={currentProduct?.prepaymentFeeAmountMin || ''}
-                        onChange={(e) => setCurrentProduct({...currentProduct, prepaymentFeeAmountMin: e.target.value})}
-                      />
+                      <input type="number" placeholder="最小" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" value={currentProduct?.prepaymentFeeAmountMin || ''} onChange={(e) => setCurrentProduct({...currentProduct, prepaymentFeeAmountMin: e.target.value})} />
                       <span className="text-slate-400">-</span>
-                      <input 
-                        type="number" placeholder="最大"
-                        className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm disabled:opacity-50"
-                        disabled={currentProduct?.prepaymentFeeRule === 'none' || currentProduct?.allowPrepayment === 'no'}
-                        value={currentProduct?.prepaymentFeeAmountMax || ''}
-                        onChange={(e) => setCurrentProduct({...currentProduct, prepaymentFeeAmountMax: e.target.value})}
-                      />
+                      <input type="number" placeholder="最大" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" value={currentProduct?.prepaymentFeeAmountMax || ''} onChange={(e) => setCurrentProduct({...currentProduct, prepaymentFeeAmountMax: e.target.value})} />
                     </div>
                   </div>
-
-                  {/* 7. 提前结清利息收取规则 */}
                   <div className="space-y-2">
                     <label className="block text-sm font-bold text-slate-700">7、提前结清利息收取规则 <span className="text-red-500">*</span></label>
-                    <div className="relative">
-                      <select 
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer disabled:opacity-50"
-                        disabled={currentProduct?.allowPrepayment === 'no'}
-                        value={currentProduct?.prepaymentInterestRule || 'none'}
-                        onChange={(e) => setCurrentProduct({...currentProduct, prepaymentInterestRule: e.target.value})}
-                      >
-                        <option value="none">不收取</option>
-                        <option value="proportional">按比例收取</option>
-                        <option value="fullPeriod">收取整期</option>
-                        <option value="allInterest">收取所有贷款利息</option>
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                      </div>
-                    </div>
+                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm appearance-none cursor-pointer" value={currentProduct?.prepaymentInterestRule || 'none'} onChange={(e) => setCurrentProduct({...currentProduct, prepaymentInterestRule: e.target.value})}><option value="none">不收取</option><option value="daily">按日收取</option><option value="fullPeriod">收取整期</option><option value="allInterest">收取所有贷款利息</option></select>
                   </div>
-
-                  {/* 8. 提前结清利息基数 */}
                   <div className="space-y-2">
                     <label className="block text-sm font-bold text-slate-700">8、提前结清利息基数</label>
-                    <div className="relative">
-                      <select 
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer disabled:opacity-50"
-                        disabled={currentProduct?.prepaymentInterestRule === 'none' || currentProduct?.allowPrepayment === 'no'}
-                        value={currentProduct?.prepaymentInterestBase || 'remainingPrincipal'}
-                        onChange={(e) => setCurrentProduct({...currentProduct, prepaymentInterestBase: e.target.value})}
-                      >
-                        <option value="remainingPrincipal">剩余未还本金</option>
-                        <option value="unbilledPrincipal">未出账本金</option>
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 9. 提前结清利息比例 */}
-                  <div className="space-y-2">
-                    <label className="block text-sm font-bold text-slate-700">9、提前结清利息比例 (%)</label>
-                    <input 
-                      type="number" step="0.01" placeholder="如：1.50"
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm disabled:opacity-50"
-                      disabled={currentProduct?.prepaymentInterestRule === 'none' || currentProduct?.allowPrepayment === 'no'}
-                      value={currentProduct?.prepaymentInterestRate || ''}
-                      onChange={(e) => setCurrentProduct({...currentProduct, prepaymentInterestRate: e.target.value})}
-                    />
+                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm appearance-none cursor-pointer" value={currentProduct?.prepaymentInterestBase || 'remainingPrincipal'} onChange={(e) => setCurrentProduct({...currentProduct, prepaymentInterestBase: e.target.value})}><option value="remainingPrincipal">剩余未还本金</option><option value="unbilledPrincipal">未出账本金</option></select>
                   </div>
                 </div>
               </div>
@@ -942,173 +736,214 @@ const ProductConfig: React.FC = () => {
         return (
           <div className="space-y-8 animate-in fade-in duration-300">
             <h3 className="text-lg font-bold text-slate-800 border-b border-slate-100 pb-4">还款规则配置</h3>
-            
-            {/* 还款模块 */}
             <div className="space-y-4">
-              <h4 className="flex items-center text-sm font-bold text-blue-700 bg-blue-50 px-3 py-2 rounded-lg">
-                还款模块
-              </h4>
+              <h4 className="flex items-center text-sm font-bold text-blue-700 bg-blue-50 px-3 py-2 rounded-lg">还款模块</h4>
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-bold text-slate-700">是否支持线下还款 <span className="text-red-500">*</span></label>
                   <div className="relative">
-                    <select 
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer"
-                      value={currentProduct?.supportOfflineRepay || 'no'}
-                      onChange={(e) => setCurrentProduct({...currentProduct, supportOfflineRepay: e.target.value})}
-                    >
-                      <option value="yes">是</option>
-                      <option value="no">否</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
+                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer" value={currentProduct?.supportOfflineRepay || 'no'} onChange={(e) => setCurrentProduct({...currentProduct, supportOfflineRepay: e.target.value})}><option value="yes">是</option><option value="no">否</option></select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg></div>
                   </div>
                 </div>
-
                 <div className="space-y-2">
                   <label className="block text-sm font-bold text-slate-700">是否支持快捷还款 <span className="text-red-500">*</span></label>
                   <div className="relative">
-                    <select 
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer"
-                      value={currentProduct?.supportQuickRepay || 'no'}
-                      onChange={(e) => setCurrentProduct({...currentProduct, supportQuickRepay: e.target.value})}
-                    >
-                      <option value="yes">是</option>
-                      <option value="no">否</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
+                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer" value={currentProduct?.supportQuickRepay || 'no'} onChange={(e) => setCurrentProduct({...currentProduct, supportQuickRepay: e.target.value})}><option value="yes">是</option><option value="no">否</option></select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg></div>
                   </div>
                 </div>
-
                 <div className="space-y-2">
                   <label className="block text-sm font-bold text-slate-700">是否支持单笔划扣 <span className="text-red-500">*</span></label>
                   <div className="relative">
-                    <select 
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer"
-                      value={currentProduct?.supportSingleDeduction || 'no'}
-                      onChange={(e) => setCurrentProduct({...currentProduct, supportSingleDeduction: e.target.value})}
-                    >
-                      <option value="yes">是</option>
-                      <option value="no">否</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
+                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer" value={currentProduct?.supportSingleDeduction || 'no'} onChange={(e) => setCurrentProduct({...currentProduct, supportSingleDeduction: e.target.value})}><option value="yes">是</option><option value="no">否</option></select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg></div>
                   </div>
                 </div>
-
                 <div className="space-y-2">
                   <label className="block text-sm font-bold text-slate-700">是否支持批量扣款 <span className="text-red-500">*</span></label>
                   <div className="relative">
-                    <select 
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer"
-                      value={currentProduct?.supportBatchDeduction || 'no'}
-                      onChange={(e) => setCurrentProduct({...currentProduct, supportBatchDeduction: e.target.value})}
-                    >
-                      <option value="yes">是</option>
-                      <option value="no">否</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
+                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer" value={currentProduct?.supportBatchDeduction || 'no'} onChange={(e) => setCurrentProduct({...currentProduct, supportBatchDeduction: e.target.value})}><option value="yes">是</option><option value="no">否</option></select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg></div>
                   </div>
                 </div>
-
                 <div className="space-y-2">
                   <label className="block text-sm font-bold text-slate-700">是否支持坐席豁免 <span className="text-red-500">*</span></label>
                   <div className="relative">
-                    <select 
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer"
-                      value={currentProduct?.supportAgentWaiver || 'no'}
-                      onChange={(e) => setCurrentProduct({...currentProduct, supportAgentWaiver: e.target.value})}
-                    >
-                      <option value="yes">是</option>
-                      <option value="no">否</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
+                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer" value={currentProduct?.supportAgentWaiver || 'no'} onChange={(e) => setCurrentProduct({...currentProduct, supportAgentWaiver: e.target.value})}><option value="yes">是</option><option value="no">否</option></select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg></div>
                   </div>
                 </div>
               </div>
             </div>
-
-            {/* 溢缴款模块 */}
             <div className="space-y-4 pt-4 border-t border-slate-100">
-              <h4 className="flex items-center text-sm font-bold text-indigo-700 bg-indigo-50 px-3 py-2 rounded-lg">
-                溢缴款模块
-              </h4>
+              <h4 className="flex items-center text-sm font-bold text-indigo-700 bg-indigo-50 px-3 py-2 rounded-lg">溢缴款模块</h4>
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-bold text-slate-700">溢缴款是否支持批量退还 <span className="text-red-500">*</span></label>
                   <div className="relative">
-                    <select 
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer"
-                      value={currentProduct?.overpaymentBatchRefund || 'no'}
-                      onChange={(e) => setCurrentProduct({...currentProduct, overpaymentBatchRefund: e.target.value})}
-                    >
-                      <option value="yes">是</option>
-                      <option value="no">否</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
+                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer" value={currentProduct?.overpaymentBatchRefund || 'no'} onChange={(e) => setCurrentProduct({...currentProduct, overpaymentBatchRefund: e.target.value})}><option value="yes">是</option><option value="no">否</option></select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg></div>
                   </div>
                 </div>
-
                 <div className="space-y-2">
                   <label className="block text-sm font-bold text-slate-700">溢缴款是否支持抵扣欠款 <span className="text-red-500">*</span></label>
                   <div className="relative">
-                    <select 
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer"
-                      value={currentProduct?.overpaymentOffsetArrears || 'no'}
-                      onChange={(e) => setCurrentProduct({...currentProduct, overpaymentOffsetArrears: e.target.value})}
-                    >
-                      <option value="yes">是</option>
-                      <option value="no">否</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
+                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer" value={currentProduct?.overpaymentOffsetArrears || 'no'} onChange={(e) => setCurrentProduct({...currentProduct, overpaymentOffsetArrears: e.target.value})}><option value="yes">是</option><option value="no">否</option></select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg></div>
                   </div>
                 </div>
-
                 <div className="space-y-2">
                   <label className="block text-sm font-bold text-slate-700">溢缴款是否支持抵扣其他借据 <span className="text-red-500">*</span></label>
                   <div className="relative">
-                    <select 
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer"
-                      value={currentProduct?.overpaymentOffsetOtherLoans || 'no'}
-                      onChange={(e) => setCurrentProduct({...currentProduct, overpaymentOffsetOtherLoans: e.target.value})}
-                    >
-                      <option value="yes">是</option>
-                      <option value="no">否</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
+                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer" value={currentProduct?.overpaymentOffsetOtherLoans || 'no'} onChange={(e) => setCurrentProduct({...currentProduct, overpaymentOffsetOtherLoans: e.target.value})}><option value="yes">是</option><option value="no">否</option></select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg></div>
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        );
+      case 'post-loan':
+        return (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <h3 className="text-lg font-bold text-slate-800 border-b border-slate-100 pb-4">贷后管理配置</h3>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="block text-sm font-bold text-slate-700">产品是否支持债务重组 <span className="text-red-500">*</span></label>
+                <div className="relative">
+                  <select 
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer"
+                    value={currentProduct?.supportDebtRestructuring || 'no'}
+                    onChange={(e) => setCurrentProduct({...currentProduct, supportDebtRestructuring: e.target.value})}
+                  >
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-bold text-slate-700">产品是否支持延期 <span className="text-red-500">*</span></label>
+                <div className="relative">
+                  <select 
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer"
+                    value={currentProduct?.supportExtension || 'no'}
+                    onChange={(e) => setCurrentProduct({...currentProduct, supportExtension: e.target.value})}
+                  >
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-bold text-slate-700">产品是否支持借新还旧 <span className="text-red-500">*</span></label>
+                <div className="relative">
+                  <select 
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer"
+                    value={currentProduct?.supportRefinancing || 'no'}
+                    onChange={(e) => setCurrentProduct({...currentProduct, supportRefinancing: e.target.value})}
+                  >
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-span-2 p-4 bg-slate-50 rounded-2xl border border-slate-100 mt-6">
+              <p className="text-xs text-slate-500 leading-relaxed">
+                <span className="font-bold text-slate-700">业务说明：</span> 
+                贷后管理规则配置将影响资产重组流转与逾期资产处置策略。债务重组通常涉及期限延长与利率下调；借新还旧需通过专门的结清放款引擎执行。
+              </p>
+            </div>
+          </div>
+        );
+      case 'closure':
+        return (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <h3 className="text-lg font-bold text-slate-800 border-b border-slate-100 pb-4">关户规则配置</h3>
+            <div className="grid grid-cols-2 gap-6">
+              {/* 1、放款失败是否关户 */}
+              <div className="space-y-2">
+                <label className="block text-sm font-bold text-slate-700">放款失败是否关户 <span className="text-red-500">*</span></label>
+                <div className="relative">
+                  <select 
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer"
+                    value={currentProduct?.closeOnLoanFailure || 'no'}
+                    onChange={(e) => setCurrentProduct({...currentProduct, closeOnLoanFailure: e.target.value})}
+                  >
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2、合同结清是否关户 */}
+              <div className="space-y-2">
+                <label className="block text-sm font-bold text-slate-700">合同结清是否关户 <span className="text-red-500">*</span></label>
+                <div className="relative">
+                  <select 
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer"
+                    value={currentProduct?.closeOnContractSettlement || 'no'}
+                    onChange={(e) => setCurrentProduct({...currentProduct, closeOnContractSettlement: e.target.value})}
+                  >
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3、有效期到期无余额是否关户 */}
+              <div className="space-y-2">
+                <label className="block text-sm font-bold text-slate-700">有效期到期无余额是否关户 <span className="text-red-500">*</span></label>
+                <div className="relative">
+                  <select 
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer"
+                    value={currentProduct?.closeOnExpiryNoBalance || 'no'}
+                    onChange={(e) => setCurrentProduct({...currentProduct, closeOnExpiryNoBalance: e.target.value})}
+                  >
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-span-2 p-4 bg-slate-50 rounded-2xl border border-slate-100 mt-6">
+              <p className="text-xs text-slate-500 leading-relaxed">
+                <span className="font-bold text-slate-700">业务说明：</span> 
+                关户规则决定了授信合同的生命周期终点。在循环额度产品中，有效期到期且余额结清后的自动关户是系统合规性的重要环节。
+              </p>
             </div>
           </div>
         );
@@ -1132,88 +967,27 @@ const ProductConfig: React.FC = () => {
       <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300" onClick={() => setOpenDropdownId(null)}>
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-4">
-            <button 
-              onClick={(e) => { e.stopPropagation(); setIsEditing(false); }}
-              className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-            </button>
-            <div>
-              <h2 className="text-xl font-bold text-slate-800">
-                {currentProduct?.id ? '编辑产品配置' : '新增产品配置'}
-              </h2>
-              <div className="flex items-center mt-1">
-                <span className="text-xs text-slate-400">产品状态: </span>
-                <span className="ml-2 px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded text-[10px] font-bold">草稿</span>
-              </div>
-            </div>
+            <button onClick={() => setIsEditing(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg></button>
+            <h2 className="text-xl font-bold text-slate-800">{currentProduct?.id ? '编辑产品配置' : '新增产品配置'}</h2>
           </div>
           <div className="flex space-x-3">
-            <button 
-              onClick={(e) => { e.stopPropagation(); setIsEditing(false); }}
-              className="px-6 py-2 text-slate-600 font-bold text-sm hover:bg-slate-200 rounded-xl transition-all"
-            >
-              取消
-            </button>
-            <button 
-              onClick={(e) => { e.stopPropagation(); handleSave(); }}
-              className="px-8 py-2 bg-blue-600 text-white font-bold text-sm rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all active:scale-95"
-            >
-              暂存并提交
-            </button>
+            <button onClick={() => setIsEditing(false)} className="px-6 py-2 text-slate-600 font-bold text-sm hover:bg-slate-200 rounded-xl transition-all">取消</button>
+            <button onClick={handleSave} className="px-8 py-2 bg-blue-600 text-white font-bold text-sm rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all active:scale-95">暂存并提交</button>
           </div>
         </div>
-
-        <div className="flex flex-1 overflow-hidden bg-white border border-slate-200 rounded-3xl shadow-sm" onClick={(e) => e.stopPropagation()}>
-          {/* 左侧模块导航 */}
+        <div className="flex flex-1 overflow-hidden bg-white border border-slate-200 rounded-3xl shadow-sm">
           <div className="w-64 bg-slate-50/50 border-r border-slate-100 flex flex-col">
-            <div className="p-4 uppercase tracking-widest text-[10px] font-bold text-slate-400">
-              配置中心模块
-            </div>
-            <nav className="flex-1 overflow-y-auto px-2 space-y-1">
+            <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-1">
               {MODULES.map((module) => (
-                <button
-                  key={module.id}
-                  onClick={() => { setActiveModuleId(module.id); setOpenDropdownId(null); }}
-                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                    activeModuleId === module.id
-                      ? 'bg-blue-600 text-white shadow-md shadow-blue-100'
-                      : 'text-slate-600 hover:bg-slate-100'
-                  }`}
-                >
-                  <svg className="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={module.icon} />
-                  </svg>
+                <button key={module.id} onClick={() => { setActiveModuleId(module.id); setOpenDropdownId(null); }} className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all ${activeModuleId === module.id ? 'bg-blue-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'}`}>
+                  <svg className="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={module.icon} /></svg>
                   {module.label}
                 </button>
               ))}
             </nav>
           </div>
-
-          {/* 右侧表单内容 */}
-          <div className="flex-1 overflow-y-auto p-10 bg-white" onClick={() => setOpenDropdownId(null)}>
-            <div className="max-w-3xl mx-auto" onClick={(e) => e.stopPropagation()}>
-              {renderModuleContent()}
-              
-              {/* 全局辅助按钮 */}
-              <div className="mt-20 pt-10 border-t border-slate-50 grid grid-cols-2 gap-4">
-                 <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                    <h5 className="font-bold text-slate-800 text-sm mb-2">配置帮助</h5>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      正在编辑 [{MODULES.find(m => m.id === activeModuleId)?.label}] 模块。如果需要 AI 协助生成该模块的专家参数，请点击顶部“AI 智能方案”按钮。
-                    </p>
-                 </div>
-                 <div className="p-6 bg-blue-50/50 rounded-2xl border border-blue-100">
-                    <h5 className="font-bold text-blue-800 text-sm mb-2">快速操作</h5>
-                    <div className="flex space-x-2">
-                      <button className="text-[10px] font-bold px-2 py-1 bg-white border border-blue-200 text-blue-600 rounded">复制历史配置</button>
-                      <button className="text-[10px] font-bold px-2 py-1 bg-white border border-blue-200 text-blue-600 rounded">检查冲突</button>
-                    </div>
-                 </div>
-              </div>
-            </div>
+          <div className="flex-1 overflow-y-auto p-10 bg-white">
+            <div className="max-w-3xl mx-auto">{renderModuleContent()}</div>
           </div>
         </div>
       </div>
@@ -1223,184 +997,25 @@ const ProductConfig: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-xl font-bold text-slate-800">产品基础配置</h2>
-          <p className="text-slate-500 text-sm">管理信贷产品的核心业务要素与产品生命周期</p>
-        </div>
-        <div className="flex space-x-3">
-          <button 
-            onClick={() => setShowAiModal(true)}
-            className="flex items-center px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 border border-indigo-200"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            AI 智能方案
-          </button>
-          <button 
-            onClick={() => handleEdit(null)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm transition-all active:scale-95"
-          >
-            新增产品
-          </button>
-        </div>
+        <div><h2 className="text-xl font-bold text-slate-800">产品基础配置</h2><p className="text-slate-500 text-sm">管理信贷产品的核心业务要素</p></div>
+        <button onClick={() => handleEdit(null)} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">新增产品</button>
       </div>
-
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <table className="w-full text-left border-collapse">
+        <table className="w-full text-left">
           <thead className="bg-slate-50 border-b border-slate-200">
-            <tr>
-              <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">产品编码</th>
-              <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">产品名称</th>
-              <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">循环额度</th>
-              <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">额度期限 (月)</th>
-              <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">操作</th>
-            </tr>
+            <tr><th className="px-6 py-4 text-xs font-semibold text-slate-500">产品编码</th><th className="px-6 py-4 text-xs font-semibold text-slate-500">产品名称</th><th className="px-6 py-4 text-xs font-semibold text-slate-500 text-right">操作</th></tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {products.map((p) => (
-              <tr key={p.id} className="hover:bg-slate-50/80 transition-colors group">
-                <td className="px-6 py-4">
-                  <span className="text-sm font-mono font-medium text-slate-500">{p.code}</span>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="text-sm font-semibold text-slate-900 whitespace-nowrap">
-                    {p.name}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    p.isRevolving ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-600'
-                  }`}>
-                    {p.isRevolving ? '循环' : '非循环'}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="text-sm text-slate-600 font-medium">
-                    {p.creditTerm}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-right space-x-4">
-                  <button 
-                    onClick={() => handleEdit(p)}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-bold transition-colors"
-                  >
-                    编辑
-                  </button>
-                  <button 
-                    className="text-slate-400 hover:text-indigo-600 text-sm font-bold transition-colors"
-                  >
-                    复制
-                  </button>
-                </td>
+              <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
+                <td className="px-6 py-4 text-sm font-mono">{p.code}</td>
+                <td className="px-6 py-4 text-sm font-semibold">{p.name}</td>
+                <td className="px-6 py-4 text-right"><button onClick={() => handleEdit(p)} className="text-blue-600 hover:text-blue-800 text-sm font-bold">编辑</button></td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-
-      {/* AI Modal */}
-      {showAiModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center mr-3 shadow-inner">
-                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-slate-800">AI 智能产品设计助手</h3>
-                  <p className="text-sm text-slate-500">描述您的需求，AI 将为您推荐 product 参数</p>
-                </div>
-              </div>
-              <button onClick={() => setShowAiModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            <div className="p-6 flex-1 overflow-y-auto space-y-4">
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                <label className="block text-sm font-medium text-slate-700 mb-2">描述您的信贷产品</label>
-                <textarea 
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="例如：为中小微企业主设计的短期低息抵押贷款，额度在50万到200万之间，期限不超过一年。"
-                  className="w-full h-32 px-4 py-3 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm resize-none transition-all outline-none"
-                />
-              </div>
-
-              {loading && (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
-                  <p className="text-slate-500 animate-pulse text-sm font-medium">正在分析市场数据并为您设计最佳方案...</p>
-                </div>
-              )}
-
-              {aiResult && !loading && (
-                <div className="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100 space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <h4 className="font-bold text-indigo-900 flex items-center">
-                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                    推荐配置方案
-                  </h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="col-span-2">
-                      <p className="text-xs text-slate-500">建议产品名称</p>
-                      <p className="font-bold text-slate-800">{aiResult.name}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500">建议利率</p>
-                      <p className="font-bold text-indigo-600">{aiResult.apr}%</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500">目标客群</p>
-                      <p className="font-bold text-slate-800 truncate">{aiResult.targetAudience || '通用'}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500">额度建议</p>
-                      <p className="font-bold text-slate-800">¥{aiResult.minAmount} - ¥{aiResult.maxAmount}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500">期限建议</p>
-                      <p className="font-bold text-slate-800">{aiResult.minTerm} - {aiResult.maxTerm} 月</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end space-x-3">
-              <button 
-                onClick={() => setShowAiModal(false)}
-                className="px-6 py-2 text-slate-600 font-medium text-sm hover:bg-slate-200 rounded-xl transition-colors"
-              >
-                取消
-              </button>
-              {!aiResult ? (
-                <button 
-                  onClick={handleAiSuggest}
-                  disabled={loading || !prompt}
-                  className="px-6 py-2 bg-indigo-600 text-white font-medium text-sm rounded-xl hover:bg-indigo-700 disabled:opacity-50 shadow-lg shadow-indigo-100 transition-all"
-                >
-                  开始生成
-                </button>
-              ) : (
-                <button 
-                  onClick={applyAiResult}
-                  className="px-6 py-2 bg-green-600 text-white font-medium text-sm rounded-xl hover:bg-green-700 shadow-lg shadow-green-100 transition-all"
-                >
-                  采纳方案
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
